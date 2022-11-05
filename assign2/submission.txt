@@ -1,0 +1,52 @@
+====== Part 1 ======
+
+(brief 1-2 line explanation of your solution here)
+
+For the first part, our aim is to find the password of the bomb engineer's lab. For this the followsing steps were followed:
+1. All the lines in the system.txt which start with "alpha" were removed as we do not require the alpha logs.
+2. Next, all the lines that contain the word "beta" were removed as we do not require the beta logs. 
+3. Since the beta logs do not have a very fixed format => .contains() function was used to figure out the beta logs.
+4. From the remaining sentences in the file, we know that we need the sentence which begins with "Invalid user". 
+The above conclusion was made because the question mentions that the user had encountered the "Invalid user" error. 
+5. To extract the line which begins with "Invalid user", the function => .startswith() was used which led us to the solution string which contains the password => "Invalid user Engteampw! from 103.79.141.86"
+6. From the above extracted string we know that the password which is typed mistakingly by the user and stored in the log files was "Engteampw!" => and is the solution for part 1.
+7. The "solution" folder contains a .csv file which stores the string => "Invalid user Engteampw! from 103.79.141.86"
+
+(paste code relevant to your solution here)
+
+lines_without_alpha = df.filter(~df.value.startswith("alpha"))
+lines_without_beta = lines_without_alpha.filter(~lines_without_alpha.value.contains("beta"))
+lines_invalid_user = lines_without_beta.filter(lines_without_beta.value.startswith("Invalid user"))
+lines_invalid_user.write.format("csv").save("solution")
+lines_invalid_user.toPandas()
+
+
+====== Part 2 ======
+
+(brief 1-2 line explanation of your solution here)
+
+For the second part, our aim is to find the IP address of the bomb engineering server. The following steps are followed to search for the same:
+1. First of all, the duplicates occurring in the records are removed as we have to search for the dst IP address that has been logged in atleast once by each of the 13 unique users in the bomber's squad.
+	The duplicates are removed using the .dropDuplicates() function.
+2. Next all the users that have logged in at days which are not the bomb squad's weekly check in day sessions are identified by checking if the day they logged in is not a modulus of 7.
+3. These users and their corresponding data is stored in not_registered_users.
+4. Further, the .subtract() function is used to erase the database of these not_registered_users from the original database of all users.
+5. Now, we are left with the data of verified_users which are IP addresses of people who logged in to some destination IP Address during the weekly check in sessions of the bomber's squad.
+6. Next, we calculate the count of each unique log-in request made to the destination IP addresses in the dst column. 
+7. These counts are stored in "count" column corresponding to each the dst IP Address.
+8. Since our data is unique we know that we need to find the destination IP Address that is being logged in exactly 13 times 
+	(13 users in the bomber's squad and each person logs in atleast once- given in the question).
+9. So next, we filter the data where count column contains value exactly equal to => 13.
+10. This leaves us with the final answer => 207.025.071.025, 13
+11 Same as before this data is stored in a .csv file in the "solution" folder and the dst/destination address of the bomb engineering server is 207.025.071.025 => which is answer for part 2.
+   
+
+(paste code relevant to your solution here)
+
+lines_wo_duplicates = df.dropDuplicates(["src", "dst"])
+not_registered_users = lines_wo_duplicates.filter(lines_wo_duplicates.day % 7 != 0)
+verified_users = lines_wo_duplicates.subtract(not_registered_users)
+lines_with_count = verified_users.groupBy("dst").count()
+final_dst = lines_with_count.filter("count == 13")
+final_dst.write.format("csv").save("solution")
+final_dst.toPandas()
